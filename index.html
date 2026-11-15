@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Your personal status window.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>AWAKENING SYSTEM</title>
+  <style>
+    :root{--bg:#050b14;--panel:#0a1727;--panel2:#0d2035;--line:#17466a;--cyan:#45d9ff;--blue:#388bff;--text:#e6f5ff;--muted:#85a9c4;--good:#75f0c1;--danger:#ff7188}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(ellipse at 50% -15%,#12345a 0%,#07111f 42%,#03070d 100%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+    .wrap{width:min(760px,100%);margin:auto;padding:22px 16px 44px}
+    header{text-align:center;padding:18px 8px 22px}
+    .eyebrow{letter-spacing:.35em;color:var(--cyan);font-size:11px;font-weight:800}
+    h1{font-size:clamp(25px,6vw,38px);letter-spacing:.12em;margin:9px 0 5px;text-shadow:0 0 22px #238dff88}
+    .sub{color:var(--muted);font-size:12px;letter-spacing:.15em}
+    .panel{background:linear-gradient(145deg,#0d2035eF,#071321f2);border:1px solid var(--line);box-shadow:0 0 24px #087cc51a,inset 0 0 24px #1478b00b;border-radius:15px;padding:17px;margin:12px 0}
+    .section-title{font-size:12px;letter-spacing:.2em;color:var(--cyan);font-weight:800;margin:0 0 15px}
+    .topline{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .level{font-size:32px;font-weight:800;color:#fff}.level small{font-size:12px;color:var(--muted);letter-spacing:.15em}
+    .rank{border:1px solid #2d83c5;color:var(--cyan);padding:6px 10px;border-radius:6px;font-size:11px;letter-spacing:.14em}
+    .xp-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin:14px 0 7px}
+    .bar{height:9px;background:#06101c;border:1px solid #173a57;border-radius:20px;overflow:hidden}
+    .fill{height:100%;width:0;background:linear-gradient(90deg,#287bff,#56e4ff);box-shadow:0 0 12px #36bfff;transition:width .25s}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stat{background:#071523;border:1px solid #163b5a;border-radius:10px;padding:13px}
+    .stat-name{font-size:10px;letter-spacing:.12em;color:var(--muted);font-weight:800}
+    .stat-value{font-size:28px;font-weight:800;margin:5px 0 9px}
+    .stat-controls{display:flex;gap:7px;align-items:center}
+    button{border:1px solid #267bb1;background:#0b2942;color:var(--cyan);border-radius:7px;padding:8px 11px;font-weight:800;cursor:pointer}
+    button:active{transform:scale(.97)} button:disabled{opacity:.35;cursor:not-allowed}
+    .stat-controls button{padding:5px 10px}
+    .points{font-size:11px;color:var(--good);margin-left:auto}
+    .actions{display:flex;gap:9px;flex-wrap:wrap}
+    .actions button{flex:1;min-width:120px}
+    .quest-form{display:flex;gap:8px}
+    input{min-width:0;flex:1;background:#061321;border:1px solid #1a4568;border-radius:7px;padding:11px;color:var(--text);font:inherit}
+    input::placeholder{color:#66859d}
+    .quests{list-style:none;padding:0;margin:12px 0 0}
+    .quest{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #14334d;font-size:13px}
+    .quest:last-child{border:0}.quest span{flex:1;overflow-wrap:anywhere}
+    .quest.done span{text-decoration:line-through;color:#7895aa}
+    .quest small{color:var(--muted);white-space:nowrap}
+    .empty{font-size:12px;color:var(--muted);padding:8px 0}
+    .foot{text-align:center;color:#56748d;font-size:10px;letter-spacing:.1em;margin-top:20px}
+    .notice{color:var(--muted);font-size:11px;line-height:1.6;margin-top:12px}
+    @media(max-width:390px){.stats{grid-template-columns:1fr}.wrap{padding-inline:12px}}
+  </style>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="eyebrow">SYSTEM ONLINE</div>
+    <h1>AWAKENING</h1>
+    <div class="sub">PERSONAL STATUS WINDOW</div>
+  </header>
+
+  <section class="panel">
+    <div class="topline">
+      <div><div class="section-title" style="margin-bottom:4px">PLAYER STATUS</div><div class="level">LV. <span id="level">1</span> <small>HUNTER</small></div></div>
+      <div class="rank" id="rank">E-RANK</div>
+    </div>
+    <div class="xp-meta"><span>EXPERIENCE</span><span id="xpText">0 / 100 XP</span></div>
+    <div class="bar"><div class="fill" id="xpBar"></div></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title">ABILITY STATS</h2>
+    <div class="stats" id="stats"></div>
+    <div class="topline" style="margin-top:15px">
+      <span style="font-size:12px;color:var(--muted)">AVAILABLE STAT POINTS</span>
+      <strong id="points" style="color:var(--good);font-size:20px">0</strong>
+    </div>
+    <p class="notice">Use + to assign an available point to a stat. These five attributes are the only player stats in this app.</p>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title">SYSTEM ACTIONS</h2>
+    <div class="actions">
+      <button id="addXp">＋ GAIN 10 XP</button>
+      <button id="reset" style="border-color:#754054;color:#ff9aae">RESET DATA</button>
+    </div>
+    <p class="notice">XP and stats are saved on this device. Reset permanently clears this app's saved progress.</p>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title">DAILY QUESTS</h2>
+    <form class="quest-form" id="questForm">
+      <input id="questInput" maxlength="70" placeholder="Write your own quest..." autocomplete="off" required>
+      <button type="submit">ADD</button>
+    </form>
+    <ul class="quests" id="quests"></ul>
+  </section>
+  <div class="foot">KEEP MOVING FORWARD · SYSTEM VERSION 1.0</div>
+</main>
+<script>
+const STAT_NAMES = [
+  ["STRENGTH","القوة"],["INTELLIGENCE","الذكاء"],["VITALITY","الحيوية"],
+  ["AGILITY","الرشاقة"],["SENSE","الإدراك"]
+];
+const defaultState = () => ({
+  level:1, xp:0, points:0,
+  stats:{STRENGTH:10,INTELLIGENCE:10,VITALITY:10,AGILITY:10,SENSE:10},
+  quests:[]
+});
+let state;
+try { state = JSON.parse(localStorage.getItem("awakening-save")) || defaultState(); }
+catch { state = defaultState(); }
+function save(){ localStorage.setItem("awakening-save",JSON.stringify(state)); render(); }
+function xpNeeded(){ return state.level * 100; }
+function gainXp(amount){
+  state.xp += amount;
+  while(state.xp >= xpNeeded()){
+    state.xp -= xpNeeded();
+    state.level++;
+    state.points += 5;
+  }
+  save();
+}
+function rank(){
+  if(state.level>=50)return "S-RANK";
+  if(state.level>=30)return "A-RANK";
+  if(state.level>=20)return "B-RANK";
+  if(state.level>=10)return "C-RANK";
+  if(state.level>=5)return "D-RANK";
+  return "E-RANK";
+}
+function render(){
+  document.getElementById("level").textContent=state.level;
+  document.getElementById("rank").textContent=rank();
+  document.getElementById("xpText").textContent=`${state.xp} / ${xpNeeded()} XP`;
+  document.getElementById("xpBar").style.width=`${Math.min(100,state.xp/xpNeeded()*100)}%`;
+  document.getElementById("points").textContent=state.points;
+  const stats=document.getElementById("stats"); stats.innerHTML="";
+  STAT_NAMES.forEach(([name,ar])=>{
+    const card=document.createElement("div"); card.className="stat";
+    const label=document.createElement("div"); label.className="stat-name"; label.textContent=`${name} · ${ar}`;
+    const value=document.createElement("div"); value.className="stat-value"; value.textContent=state.stats[name];
+    const controls=document.createElement("div"); controls.className="stat-controls";
+    const plus=document.createElement("button"); plus.textContent="+";
+    plus.disabled=state.points<=0;
+    plus.setAttribute("aria-label",`Add point to ${name}`);
+    plus.onclick=()=>{if(state.points>0){state.points--;state.stats[name]++;save();}};
+    const points=document.createElement("span"); points.className="points"; points.textContent="STAT";
+    controls.append(plus,points); card.append(label,value,controls); stats.append(card);
+  });
+  const list=document.getElementById("quests"); list.innerHTML="";
+  if(!state.quests.length){const empty=document.createElement("li");empty.className="empty";empty.textContent="No quests yet. Add one above.";list.append(empty);}
+  state.quests.forEach((q,i)=>{
+    const li=document.createElement("li");li.className="quest"+(q.done?" done":"");
+    const check=document.createElement("input");check.type="checkbox";check.checked=q.done;check.style.flex="0 0 auto";
+    check.addEventListener("change",()=>{if(!q.done){state.quests[i].done=true;gainXp(10);}else{state.quests[i].done=false;save();}});
+    const label=document.createElement("span");label.textContent=q.text;
+    const remove=document.createElement("button");remove.textContent="×";remove.setAttribute("aria-label","Delete quest");remove.onclick=()=>{state.quests.splice(i,1);save();};
+    li.append(check,label,remove);list.append(li);
+  });
+}
+document.getElementById("addXp").onclick=()=>gainXp(10);
+document.getElementById("questForm").addEventListener("submit",e=>{
+  e.preventDefault();const input=document.getElementById("questInput");const text=input.value.trim();
+  if(!text)return;state.quests.push({text,done:false});input.value="";save();
+});
+document.getElementById("reset").onclick=()=>{
+  if(confirm("Reset all level, XP, stats and quests on this device?")){state=defaultState();save();}
+};
+render();
+</script>
+</body>
+</html>
